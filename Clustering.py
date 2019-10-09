@@ -1,24 +1,8 @@
-Python 3.7.2 (v3.7.2:9a3ffc0492, Dec 24 2018, 02:44:43) 
-[Clang 6.0 (clang-600.0.57)] on darwin
-Type "help", "copyright", "credits" or "license()" for more information.
->>> ___
-
-<a href='http://www.pieriandata.com'> <img src='../Pierian_Data_Logo.png' /></a>
-___
 # K Means Clustering with Python
-
-This notebook is just a code reference for the video lecture and reading.
-
-## Method Used
-
-K Means Clustering is an unsupervised learning algorithm that tries to cluster data based on their similarity. Unsupervised learning means that there is no outcome to be predicted, and the algorithm just tries to find patterns in the data. In k means clustering, we have the specify the number of clusters we want the data to be grouped into. The algorithm randomly assigns each observation to a cluster, and finds the centroid of each cluster. Then, the algorithm iterates through two steps:
-Reassign data points to the cluster whose centroid is closest. Calculate new centroid of each cluster. These two steps are repeated till the within cluster variation cannot be reduced any further. The within cluster variation is calculated as the sum of the euclidean distance between the data points and their respective cluster centroids.
-
 ## Import Libraries
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 ## Create some Data
 
@@ -50,4 +34,49 @@ ax1.scatter(data[0][:,0],data[0][:,1],c=kmeans.labels_,cmap='rainbow')
 ax2.set_title("Original")
 ax2.scatter(data[0][:,0],data[0][:,1],c=data[1],cmap='rainbow')
 
-You should note, the colors are meaningless in reference between the two plots.
+**Real Dataset Example**
+import pandas as pd
+import numpy as np
+data = pd.read_csv('Mall_Customers.csv')
+x = data.iloc[:,[3,4]].values
+
+**Elbow Method**
+wcss = []
+for i in range(1,11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0) #n_init is the number of times k-means runs with different initial centroids
+    kmeans.fit(x)
+    wcss.append(kmeans.inertia_)
+plt.plot(range(1,11),wcss)
+plt.title('The Elbow Method')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS')
+
+**Draw a dendogram to find optimal number of clusters**
+import scipy.cluster.hierarchy as sch
+plt.figure(figsize=(10,5))
+dendrogram = sch.dendrogram(sch.linkage(x, method = 'ward')) #ward method is to minimize variance within each cluster
+plt.title('Dendrogram')
+plt.xlabel('Customers')
+plt.ylabel('Euclidean Distances')
+
+**Fitting hierarchical clustering to the dataset**
+
+from sklearn.cluster import AgglomerativeClustering
+
+hc = AgglomerativeClustering(n_clusters=5, affinity='euclidean',linkage='ward')
+
+y_hc = hc.fit_predict(x)
+
+y_hc
+
+**Visualize the clusters**
+
+plt.scatter(x[y_hc == 0, 0], x[y_hc==0,1], s=100, c='red',label = 'Careful')
+plt.scatter(x[y_hc == 1, 0], x[y_hc==1,1], s=100, c='blue',label = 'Standard')
+plt.scatter(x[y_hc == 2, 0], x[y_hc==2,1], s=100, c='green',label = 'Target')
+plt.scatter(x[y_hc == 3, 0], x[y_hc==3,1], s=100, c='cyan',label = 'Careless')
+plt.scatter(x[y_hc == 4, 0], x[y_hc==4,1], s=100, c='magenta',label = 'Sensible')
+plt.title('Clusters of Clients')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score (1-100)')
+plt.legend()
