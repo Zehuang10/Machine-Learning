@@ -1,8 +1,3 @@
-Python 3.7.2 (v3.7.2:9a3ffc0492, Dec 24 2018, 02:44:43) 
-[Clang 6.0 (clang-600.0.57)] on darwin
-Type "help", "copyright", "credits" or "license()" for more information.
->>> # Recommender Systems with Python
-
 ## Import Libraries
 
 import numpy as np
@@ -32,7 +27,6 @@ df.head()
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style('white')
-%matplotlib inline
 
 df.groupby('title')['rating'].mean().sort_values(ascending=False).head()
 
@@ -86,11 +80,7 @@ corr_starwars = pd.DataFrame(similar_to_starwars,columns=['Correlation'])
 corr_starwars.dropna(inplace=True)
 corr_starwars.head()
 
-Now if we sort the dataframe by correlation, we should get the most similar movies, however note that we get some results that don't really make sense. This is because there are a lot of movies only watched once by users who also watched star wars (it was the most popular movie). 
-
 corr_starwars.sort_values('Correlation',ascending=False).head(10)
-
-Let's fix this by filtering out movies that have less than 100 reviews (this value was chosen based off the histogram from earlier).
 
 corr_starwars = corr_starwars.join(ratings['num of ratings'])
 corr_starwars.head()
@@ -99,9 +89,69 @@ Now sort the values and notice how the titles make a lot more sense:
 
 corr_starwars[corr_starwars['num of ratings']>100].sort_values('Correlation',ascending=False).head()
 
-Now the same for the comedy Liar Liar:
-
 corr_liarliar = pd.DataFrame(similar_to_liarliar,columns=['Correlation'])
 corr_liarliar.dropna(inplace=True)
 corr_liarliar = corr_liarliar.join(ratings['num of ratings'])
 corr_liarliar[corr_liarliar['num of ratings']>100].sort_values('Correlation',ascending=False).head()   
+
+n_users = df.user_id.nunique()
+n_items = df.item_id.nunique()
+
+print('Num. of Users: '+ str(n_users))
+print('Num of Movies: '+str(n_items))
+
+## Train Test Split
+
+from sklearn.cross_validation import train_test_split
+train_data, test_data = train_test_split(df, test_size=0.25)
+
+## Memory-Based Collaborative Filtering
+
+#Create two user-item matrices, one for training and another for testing
+train_data_matrix = np.zeros((n_users, n_items))
+for line in train_data.itertuples():
+    train_data_matrix[line[1]-1, line[2]-1] = line[3]  
+
+test_data_matrix = np.zeros((n_users, n_items))
+for line in test_data.itertuples():
+    test_data_matrix[line[1]-1, line[2]-1] = line[3]
+
+from sklearn.metrics.pairwise import pairwise_distances
+user_similarity = pairwise_distances(train_data_matrix, metric='cosine')
+item_similarity = pairwise_distances(train_data_matrix.T, metric='cosine')
+
+def predict(ratings, similarity, type='user'):
+    if type == 'user':
+        mean_user_rating = ratings.mean(axis=1)
+        #You use np.newaxis so that mean_user_rating has same format as ratings
+        ratings_diff = (ratings - mean_user_rating[:, np.newaxis]) 
+        pred = mean_user_rating[:, np.newaxis] + similarity.dot(ratings_diff) / np.array([np.abs(similarity).sum(axis=1)]).T
+    elif type == 'item':
+        pred = ratings.dot(similarity) / np.array([np.abs(similarity).sum(axis=1)])     
+    return pred
+item_prediction = predict(train_data_matrix, item_similarity, type='item')
+user_prediction = predict(train_data_matrix, user_similarity, type='user')
+
+### Evaluation
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+def rmse(prediction, ground_truth):
+    prediction = prediction[ground_truth.nonzero()].flatten() 
+    ground_truth = ground_truth[ground_truth.nonzero()].flatten()
+    return sqrt(mean_squared_error(prediction, ground_truth))
+
+print('User-based CF RMSE: ' + str(rmse(user_prediction, test_data_matrix)))
+print('Item-based CF RMSE: ' + str(rmse(item_prediction, test_data_matrix)))
+
+# Model-based Collaborative Filtering
+sparsity=round(1.0-len(df)/float(n_users*n_items),3)
+print('The sparsity level of MovieLens100K is ' +  str(sparsity*100) + '%')
+
+import scipy.sparse as sp
+from scipy.sparse.linalg import svds
+
+#get SVD components from train matrix. Choose k.
+u, s, vt = svds(train_data_matrix, k = 20)
+s_diag_matrix=np.diag(s)
+X_pred = np.dot(np.dot(u, s_diag_matrix), vt)
+print('User-based CF MSE: ' + str(rmse(X_pred, test_data_matrix)))
