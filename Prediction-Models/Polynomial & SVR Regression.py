@@ -1,10 +1,7 @@
-Python 3.7.2 (v3.7.2:9a3ffc0492, Dec 24 2018, 02:44:43) 
-[Clang 6.0 (clang-600.0.57)] on darwin
-Type "help", "copyright", "credits" or "license()" for more information.
->>> import pandas as pd
+#Polynomial Regression
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 data = pd.read_csv('Position_Salaries.csv')
 
@@ -56,3 +53,59 @@ linear_regressor.predict(x)
 **Predicting new results with Polynomial Regression**
 
 lin_reg2.predict(poly_reg.fit_transform(x))
+
+#SVR 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('Position_Salaries.csv')
+
+data
+
+x = data.iloc[:,1:2].values
+y = data.iloc[:,2].values
+
+x
+
+y
+
+y = y.reshape(-1,1)
+
+**Feature Scaling**
+
+from sklearn.preprocessing import StandardScaler
+
+sc_x = StandardScaler()
+sc_y = StandardScaler()
+
+x = sc_x.fit_transform(x)
+y = sc_y.fit_transform(y)
+
+**Fitting SVR to the dataset**
+
+from sklearn.svm import SVR
+
+regressor = SVR(kernel='rbf',gamma='auto')
+
+regressor.fit(x,y)
+
+y_pred = sc_y.inverse_transform(regressor.predict(sc_x.transform(np.array([[6.5]]))))
+
+y_pred #It is a very close prediction to the actual value
+
+The values are not good here because SVR does not apply feature scaling in this library
+
+**Visualizing the SVR results**
+
+plt.scatter(x,y,color='red')
+plt.plot(x,regressor.predict(x))
+
+**Visualizing the SVR results (for higher resolution and smoother curve)**
+
+x_grid = np.arange(min(x),max(x),0.1)
+
+x_grid = x_grid.reshape(len(x_grid),1)
+
+plt.scatter(x,y,color='red')
+plt.plot(x_grid,regressor.predict(x_grid))
