@@ -136,10 +136,3 @@ You should have gotten a very good model with a good fit. Let's quickly explore 
 **Plot a histogram of the residuals and make sure it looks normally distributed. Use either seaborn distplot, or just plt.hist().**
 
 sns.distplot(y_test-predictions,bins=50)
-
-# Logistic Regression with Python
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-%matplotlib inline
