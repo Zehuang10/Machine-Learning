@@ -155,3 +155,36 @@ u, s, vt = svds(train_data_matrix, k = 20)
 s_diag_matrix=np.diag(s)
 X_pred = np.dot(np.dot(u, s_diag_matrix), vt)
 print('User-based CF MSE: ' + str(rmse(X_pred, test_data_matrix)))
+
+#Using Apriori for Association Rules
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('Market_Basket_Optimisation.csv',header=None ) #specify we dont have columns on the dataset
+
+data.head()
+
+**Prepare our apriori list for the analysis**
+
+transactions = []
+for i in range(0,7501):
+    transactions.append([str(data.values[i,j]) for j in range (0,20)])
+
+type(transactions)
+
+data.values
+
+**Training Apriori on the dataset**
+
+from apyori import apriori
+
+rules = apriori(transactions, min_support = 0.003,min_confidence = 0.2,min_lift=3,min_length=2)
+
+3*7/7500 #an approach for support level
+
+**Visualizing the results**
+
+results = list(rules)
+
+results
