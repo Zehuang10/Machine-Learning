@@ -1,10 +1,6 @@
-Python 3.7.2 (v3.7.2:9a3ffc0492, Dec 24 2018, 02:44:43) 
-[Clang 6.0 (clang-600.0.57)] on darwin
-Type "help", "copyright", "credits" or "license()" for more information.
->>> import pandas as pd
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 data = pd.read_csv('50_Startups.csv')
 
@@ -33,13 +29,9 @@ data.head()
 x = data.drop('Profit',axis=1)
 y = data['Profit']
 
-**Avoiding Dummy Variable Trap**, by using pd.dummies function it already take care for us by removing CA
-
 from sklearn.model_selection import train_test_split
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
-
-**Fitting Multiple Linear Regression**
 
 from sklearn.linear_model import LinearRegression
 
@@ -71,8 +63,6 @@ regressor_OLS.summary()
 
 data.head()
 
-**Lets remove column x5 it has the highest p-value**
-
 x_opt = x[:, [0,1,2,3,4]]
 regressor_OLS = sm.OLS(endog=y , exog=x_opt).fit()
 regressor_OLS.summary()
@@ -99,8 +89,6 @@ def backwardElimination(x, sl):
 SL = 0.05
 x_opt = x[:, [0, 1, 2, 3, 4, 5]]
 x_Modeled = backwardElimination(x_opt, SL)
-
-
 
 #x_Modeled
 
