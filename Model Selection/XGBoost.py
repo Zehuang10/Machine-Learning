@@ -31,7 +31,6 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 **Fitting XGBoost to the Training Set**
 
 from xgboost import XGBClassifier
-
 classifier = XGBClassifier()
 classifier.fit(x_train,y_train)
 
