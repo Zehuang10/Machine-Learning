@@ -2,9 +2,9 @@
 
 Apply K-Fold to the Kernel SVM model
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+  import pandas as pd
+  import numpy as np
+  import matplotlib.pyplot as plt
 
 data = pd.read_csv('Social_Network_Ads.csv')
 
