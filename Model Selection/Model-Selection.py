@@ -2,15 +2,14 @@
 
 Apply K-Fold to the Kernel SVM model
 
-  import pandas as pd
-  import numpy as np
-  import matplotlib.pyplot as plt
-  %matplotlib inline
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-  data = pd.read_csv('Social_Network_Ads.csv')
+data = pd.read_csv('Social_Network_Ads.csv')
 
-  x = data.iloc[:,[2,3]].values
-  y = data.iloc[:,4].values
+x = data.iloc[:,[2,3]].values
+y = data.iloc[:,4].values
 
 **Splitting dataset into training and test set**
 
